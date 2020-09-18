@@ -1,5 +1,3 @@
-#Control Home Appliances from Raspberry Pi using Android Application, (Backend-service)
-
 import os
 import RPi.GPIO as GPIO
 from flask import Flask, request,render_template
@@ -9,11 +7,12 @@ GPIO.setwarnings(False)
 
 app = Flask(__name__)
 
+
 #define actuators GPIOs
 switch = 16
 
 #initialize GPIO status variables
-switchSts =0
+#switchSts =0
 
 #define switch pin as output
 GPIO.setup(switch, GPIO.OUT)
@@ -21,11 +20,15 @@ GPIO.setup(switch, GPIO.OUT)
 #turn leds off
 GPIO.output(switch, GPIO.LOW)
 
-@app.route('/android',methods=["POST"])
+@app.route('/send')
+def Send():
+    return "MSG Sent"
+
+@app.route('/pull',methods=["POST"])
 def home():
     global value
     value=request.form['value']
-    print(value)
+    print("Message Recieved",value)
     if value=="on" or value=="ON":
         print("Light is turned on")
         GPIO.output(switch,GPIO.HIGH)
@@ -35,13 +38,12 @@ def home():
         print("Light is turned Off")
         GPIO.output(switch,GPIO.LOW)
         return "Light is turned Off"
-    return ("Succesfully sent")
+    return push()
 
-
-@app.route('/send')
-def Send():
-    return "MSG Sent"
-    
+@app.route('/push')
+def push():
+    print("Message sent to the client: ",value)
+    return value
 
 @app.route('/')
 def view():
@@ -53,4 +55,4 @@ def view():
 
 if __name__ == "__main__":
     os.system("clear")
-    app.run(host="0.0.0.0", port="80", debug= False)
+    app.run(host="0.0.0.0", port="80", debug= True)
